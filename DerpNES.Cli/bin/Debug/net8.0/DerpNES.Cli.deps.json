@@ -7,14 +7,27 @@
   "targets": {
     ".NETCoreApp,Version=v8.0": {
       "DerpNES.Cli/1.0.0": {
+        "dependencies": {
+          "DerpNES": "1.0.0"
+        },
         "runtime": {
           "DerpNES.Cli.dll": {}
+        }
+      },
+      "DerpNES/1.0.0": {
+        "runtime": {
+          "DerpNES.dll": {}
         }
       }
     }
   },
   "libraries": {
     "DerpNES.Cli/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "DerpNES/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

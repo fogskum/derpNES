@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace DerpNES;
 
-namespace DerpNES;
-
-public interface ICpu
+internal interface ICpu
 {
     void ConnectBus( IBus bus );
 }

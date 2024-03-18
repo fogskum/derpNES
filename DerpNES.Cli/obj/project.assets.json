@@ -1,11 +1,30 @@
 {
   "version": 3,
   "targets": {
-    "net8.0": {}
+    "net8.0": {
+      "DerpNES/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "compile": {
+          "bin/placeholder/DerpNES.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DerpNES.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "DerpNES/1.0.0": {
+      "type": "project",
+      "path": "../DerpNES/DerpNES.csproj",
+      "msbuildProject": "../DerpNES/DerpNES.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net8.0": []
+    "net8.0": [
+      "DerpNES >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\jrols\\.nuget\\packages\\": {}
@@ -13,11 +32,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Source\\DerpNES\\DerpNES.Cli\\DerpNES.Cli.csproj",
+      "projectUniqueName": "C:\\Source\\fogskum\\derpNES\\DerpNES.Cli\\DerpNES.Cli.csproj",
       "projectName": "DerpNES.Cli",
-      "projectPath": "C:\\Source\\DerpNES\\DerpNES.Cli\\DerpNES.Cli.csproj",
+      "projectPath": "C:\\Source\\fogskum\\derpNES\\DerpNES.Cli\\DerpNES.Cli.csproj",
       "packagesPath": "C:\\Users\\jrols\\.nuget\\packages\\",
-      "outputPath": "C:\\Source\\DerpNES\\DerpNES.Cli\\obj\\",
+      "outputPath": "C:\\Source\\fogskum\\derpNES\\DerpNES.Cli\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\jrols\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -33,7 +52,11 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Source\\fogskum\\derpNES\\DerpNES\\DerpNES.csproj": {
+              "projectPath": "C:\\Source\\fogskum\\derpNES\\DerpNES\\DerpNES.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

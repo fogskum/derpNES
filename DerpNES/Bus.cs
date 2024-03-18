@@ -1,12 +1,17 @@
 ﻿namespace DerpNES;
 
-public class Bus : IBus
+internal class Bus : IBus
 {
-    public ICpu Cpu { get; } = null!;
+    (UInt16 Start, UInt16 End) _addressRange = new(0x00, 0xFFFF);
 
     UInt8[] ram = new UInt8[1024 * 64];
 
-    bool InRange( UInt16 address ) => address >= 0 && address <= 0xFFFF;
+    public Bus()
+    {
+        
+    }
+
+    bool InRange( UInt16 address ) => address >= _addressRange.Start && address <= _addressRange.End;
 
     public void Write( UInt16 address, UInt8 data )
     {

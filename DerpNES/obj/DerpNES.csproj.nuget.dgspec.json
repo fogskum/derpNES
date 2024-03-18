@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Source\\DerpNES\\DerpNES\\DerpNES.csproj": {}
+    "C:\\Source\\fogskum\\derpNES\\DerpNES\\DerpNES.csproj": {}
   },
   "projects": {
-    "C:\\Source\\DerpNES\\DerpNES\\DerpNES.csproj": {
+    "C:\\Source\\fogskum\\derpNES\\DerpNES\\DerpNES.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Source\\DerpNES\\DerpNES\\DerpNES.csproj",
+        "projectUniqueName": "C:\\Source\\fogskum\\derpNES\\DerpNES\\DerpNES.csproj",
         "projectName": "DerpNES",
-        "projectPath": "C:\\Source\\DerpNES\\DerpNES\\DerpNES.csproj",
+        "projectPath": "C:\\Source\\fogskum\\derpNES\\DerpNES\\DerpNES.csproj",
         "packagesPath": "C:\\Users\\jrols\\.nuget\\packages\\",
-        "outputPath": "C:\\Source\\DerpNES\\DerpNES\\obj\\",
+        "outputPath": "C:\\Source\\fogskum\\derpNES\\DerpNES\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\jrols\\AppData\\Roaming\\NuGet\\NuGet.Config",
