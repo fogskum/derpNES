@@ -1,8 +1,8 @@
 ﻿namespace DerpNES;
 
-internal class Bus : IBus
+public class Bus : IBus
 {
-    readonly (uint Start, uint End) _addressRange = new(0x0000, 0xFFFF);
+    readonly uint _addressRange = 0xFFFF;
 
     uint[] ram = new uint[1024 * 64];
 
@@ -11,7 +11,7 @@ internal class Bus : IBus
         
     }
 
-    bool InAddressRange( uint address ) => address >= _addressRange.Start && address <= _addressRange.End;
+    bool InAddressRange( uint address ) => address <= _addressRange;
 
     public void Write( uint address, uint data )
     {

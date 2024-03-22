@@ -10,8 +10,9 @@ public class InstructionTests
     [Test]
     public void TestFlags()
     {
-        var cpu = new Cpu6502();
-        
+        var emulator = new Emulator(null);
+        var cpu = new Cpu6502( emulator );
+
         cpu.SetFlag( Cpu6502.StatusFlag.Zero, true );
         cpu.SetFlag( Cpu6502.StatusFlag.Negative, true );
         var flagStatus = cpu.GetFlag( Cpu6502.StatusFlag.Zero );
@@ -25,10 +26,10 @@ public class InstructionTests
     [Test]
     public void Test_AND()
     {
-        var bus = new Bus();
-        var cpu = new Cpu6502();
+        var emulator = new Emulator(null);
+        var cpu = new Cpu6502( emulator );
         var cycles = cpu.AND();
 
-        
+        Assert.Pass();
     }
 }

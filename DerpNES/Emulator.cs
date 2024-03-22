@@ -2,13 +2,11 @@
 
 public class Emulator
 {
-    readonly Cpu6502 cpu = null!;
-    readonly IBus bus = new Bus();
+    readonly Cpu6502 cpu;
 
-    public Emulator()
+    public Emulator(string? path)
     {
-        bus = new Bus();
-        cpu = new Cpu6502(bus);
+        this.cpu = new Cpu6502(this);
     }
 
     public void Run()

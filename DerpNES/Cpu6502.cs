@@ -47,12 +47,12 @@ public sealed partial class Cpu6502
     // Points to an address somewhere in the memory (bus)
     // Incremented/decremented as we pull things from the stack
     uint StackPointer = 0x00;
-    
+
     // Stores the address of the next progran uint
     // Increases with each clock or can be directly set in a branch to jump to
     // Different parts of the program, like a if-statement
     uint ProgramCounter = 0x0000;
-   
+
 
     /// <summary>
     /// Perform one clock cycle
@@ -80,7 +80,7 @@ public sealed partial class Cpu6502
 
     uint FetchData()
     {
-        if(_instructions[_currentInstruction].AddressMode != Implied)
+        if (_instructions[_currentInstruction].AddressMode != Implied)
         {
             _fetchedData = ReadByte( _addressAbsolute );
         }
@@ -96,10 +96,11 @@ public sealed partial class Cpu6502
     uint _currentInstruction;
 
     private readonly IBus bus;
+    private readonly Emulator emulator;
 
-    public Cpu6502( IBus bus )
+    public Cpu6502( Emulator emulator )
     {
-        var instructions = ImmutableArray.Create( 
+        var instructions = ImmutableArray.Create(
          new Instruction( Opcode: 0x00, Operate: BRK, AddressMode: Immediate, Cycles: 7 ),
          new Instruction( Opcode: 0x09, Operate: ORA, AddressMode: Immediate, Cycles: 2 ),
          new Instruction( Opcode: 0x05, Operate: ORA, AddressMode: ZeroPage, Cycles: 3 ),
@@ -111,17 +112,20 @@ public sealed partial class Cpu6502
          new Instruction( Opcode: 0x11, Operate: ORA, AddressMode: IndirectY, Cycles: 5 )
         );
         _instructions = instructions.ToDictionary( k => k.Opcode, v => v );
-        this.bus = bus;
+
+        this.emulator = emulator;
+        this.bus = new Bus();
     }
 
     uint NextByte() => ReadByte( ProgramCounter++ );
     uint NextWord() => NextByte() | (NextByte() << 8);
 
-    public bool GetFlag( StatusFlag flagBit ) => (FlagStatus & (uint)flagBit) > 0 ? true : false;
+    public bool GetFlag( StatusFlag flagBit )
+        => (FlagStatus & (uint)flagBit) > 0 ? true : false;
 
     public void SetFlag( StatusFlag flagBit, bool set )
     {
-        if(set)
+        if (set)
         {
             FlagStatus |= (uint)flagBit;
         }
@@ -132,6 +136,6 @@ public sealed partial class Cpu6502
         }
     }
 
-    public uint ReadByte( uint address ) => Bus.Read( address );
-    public void WriteByte( uint address, uint data ) => Bus.Write( address, data );
+    public uint ReadByte( uint address ) => bus.Read( address );
+    public void WriteByte( uint address, uint data ) => bus.Write( address, data );
 }
