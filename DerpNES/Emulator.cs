@@ -4,13 +4,14 @@ public class Emulator
 {
     readonly Cpu6502 cpu;
 
-    public Emulator(string? path)
+    public Emulator()
     {
-        this.cpu = new Cpu6502(this);
+        this.cpu = new Cpu6502();
     }
 
     public void Run()
     {
-        cpu.Clock();
+        cpu.Reset();
+        cpu.Execute();
     }
 }

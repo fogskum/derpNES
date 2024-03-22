@@ -44,22 +44,23 @@ public sealed partial class Cpu6502
     uint X = 0x00;
     uint Y = 0x00;
 
+    // Stack pointer
     // Points to an address somewhere in the memory (bus)
     // Incremented/decremented as we pull things from the stack
-    uint StackPointer = 0x00;
+    uint SP = 0x00;
 
+    // Program counter
     // Stores the address of the next progran uint
     // Increases with each clock or can be directly set in a branch to jump to
     // Different parts of the program, like a if-statement
-    uint ProgramCounter = 0x0000;
-
+    uint PC = 0x0000;
 
     /// <summary>
     /// Perform one clock cycle
     /// </summary>
-    public void Clock()
+    public void Execute()
     {
-        if (_cycles == 0)
+        if( _cycles == 0 )
         {
             // get opcode for current location => will increase PC
             _currentInstruction = NextByte();
@@ -72,10 +73,21 @@ public sealed partial class Cpu6502
         _cycles--;
     }
 
-    // these are interrupt signals
-    // runs async but will finish the current instruction before interrupt
-    void Reset() { }
+    // press reset on the NES
+    public void Reset() 
+    {
+        PC = 0xFFFC;
+        SP = 0x0100;
+        FlagStatus = 0;
+        A = X = Y = 0;
+
+        // test
+        memory.Write( 0xFFFC, 0xA9 );
+        memory.Write( 0xFFFD, 42 );
+    }
+    
     void InterruptRequest() { }
+    
     void NonMaskableInterrupt() { }
 
     uint FetchData()
@@ -95,10 +107,9 @@ public sealed partial class Cpu6502
     Dictionary<uint, Instruction> _instructions;
     uint _currentInstruction;
 
-    private readonly IBus bus;
-    private readonly Emulator emulator;
+    private readonly IBus memory = new Memory();
 
-    public Cpu6502( Emulator emulator )
+    public Cpu6502()
     {
         var instructions = ImmutableArray.Create(
          new Instruction( Opcode: 0x00, Operate: BRK, AddressMode: Immediate, Cycles: 7 ),
@@ -109,16 +120,27 @@ public sealed partial class Cpu6502
          new Instruction( Opcode: 0x1D, Operate: ORA, AddressMode: AbsoluteX, Cycles: 4 ),
          new Instruction( Opcode: 0x19, Operate: ORA, AddressMode: AbsoluteY, Cycles: 4 ),
          new Instruction( Opcode: 0x01, Operate: ORA, AddressMode: IndirectX, Cycles: 6 ),
-         new Instruction( Opcode: 0x11, Operate: ORA, AddressMode: IndirectY, Cycles: 5 )
+         new Instruction( Opcode: 0x11, Operate: ORA, AddressMode: IndirectY, Cycles: 5 ),
+         new Instruction( Opcode: 0xA9, Operate: LDA, AddressMode: Immediate, Cycles: 2 ),
+         new Instruction( Opcode: 0xA5, Operate: LDA, AddressMode: ZeroPage, Cycles: 3 ),
+         new Instruction( Opcode: 0xB5, Operate: LDA, AddressMode: ZeroPageX, Cycles: 4 ),
+         new Instruction( Opcode: 0xAD, Operate: LDA, AddressMode: Absolute, Cycles: 4 ),
+         new Instruction( Opcode: 0xBD, Operate: LDA, AddressMode: AbsoluteX, Cycles: 4 ),
+         new Instruction( Opcode: 0xB9, Operate: LDA, AddressMode: AbsoluteY, Cycles: 4 ),
+         new Instruction( Opcode: 0xA1, Operate: LDA, AddressMode: IndirectX, Cycles: 6 ),
+         new Instruction( Opcode: 0xB1, Operate: LDA, AddressMode: IndirectY, Cycles: 5 )
         );
         _instructions = instructions.ToDictionary( k => k.Opcode, v => v );
-
-        this.emulator = emulator;
-        this.bus = new Bus();
     }
 
-    uint NextByte() => ReadByte( ProgramCounter++ );
+    public uint ReadByte( uint address ) => memory.Read( address );
+    public void WriteByte( uint address, uint data ) => memory.Write( address, data );
+    
+    uint NextByte() => ReadByte( PC++ );
+
+    // 6502 is little endian
     uint NextWord() => NextByte() | (NextByte() << 8);
+    uint ReadWord() => ReadByte( PC ) | (ReadByte(PC) << 8);
 
     public bool GetFlag( StatusFlag flagBit )
         => (FlagStatus & (uint)flagBit) > 0 ? true : false;
@@ -132,10 +154,7 @@ public sealed partial class Cpu6502
         else
         {
             // clear flag
-            FlagStatus &= ~(uint)flagBit;
+            FlagStatus &= (uint)~flagBit;
         }
     }
-
-    public uint ReadByte( uint address ) => bus.Read( address );
-    public void WriteByte( uint address, uint data ) => bus.Write( address, data );
 }

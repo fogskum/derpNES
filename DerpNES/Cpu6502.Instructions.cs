@@ -9,6 +9,19 @@ public partial class Cpu6502
     }
 
     /// <summary>
+    /// Loads a byte of memory into the accumulator
+    /// </summary>
+    /// <returns></returns>
+    uint LDA()
+    {
+        A = NextByte();
+        SetFlag( StatusFlag.Zero, A == 0 );
+        SetFlag( StatusFlag.Negative, (A & (uint)StatusFlag.Negative) > 0 );
+
+        return 0;
+    }
+
+    /// <summary>
     /// Add with carry
     /// </summary>
     uint ADC() => throw new NotImplementedException();

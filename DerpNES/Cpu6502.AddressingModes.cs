@@ -32,7 +32,7 @@ public partial class Cpu6502
     /// <returns></returns>
     uint Immediate()
     {
-        _addressAbsolute = ProgramCounter++;
+        _addressAbsolute = PC;
         return 0;
     }
 
@@ -98,7 +98,7 @@ public partial class Cpu6502
 
     /// <summary>
     /// This addressing mode targets values following a beginning of the memory (zeropage), and are very quick to run. 
-    /// When run a uint is read following the instruction representing an offset from the zero page.
+    /// When run a byte is read following the instruction representing an offset from the zero page.
     /// Zeropage X and Y additionally add the X or Y index (as applicable) to this offset.
     /// If the additional of the index causes the instruction to carry,
     /// the carry is dropped and the returned address instead just wraps back around to start at zero.
@@ -107,7 +107,13 @@ public partial class Cpu6502
     /// </summary>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    uint ZeroPage() => throw new NotImplementedException();
+    uint ZeroPage()
+    {
+        _addressAbsolute = NextByte() & 0x00FF;
+
+        return 0;
+    }
+
     uint ZeroPageX() => throw new NotImplementedException();
     uint ZeroPageY() => throw new NotImplementedException();
 }

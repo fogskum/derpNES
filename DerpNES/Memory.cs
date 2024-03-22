@@ -1,14 +1,17 @@
 ﻿namespace DerpNES;
 
-public class Bus : IBus
+public class Memory : IBus
 {
     readonly uint _addressRange = 0xFFFF;
 
     uint[] ram = new uint[1024 * 64];
 
-    public Bus()
+    public Memory()
     {
-        
+        for(int i = 0; i < ram.Length; i++)
+        {
+            ram[i] = 0;
+        }
     }
 
     bool InAddressRange( uint address ) => address <= _addressRange;
