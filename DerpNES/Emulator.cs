@@ -2,7 +2,7 @@
 
 public class Emulator
 {
-    readonly Olc6502 cpu = new Olc6502();
+    readonly Cpu6502 cpu = new Cpu6502();
     readonly IBus bus = new Bus();
 
     public Emulator()

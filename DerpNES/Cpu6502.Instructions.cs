@@ -1,7 +1,7 @@
 ﻿namespace DerpNES;
 
 // https://masswerk.at/6502/6502_instruction_set.html#LSR
-internal partial class Olc6502
+public partial class Cpu6502
 {
     uint Illegal()
     {
@@ -17,7 +17,15 @@ internal partial class Olc6502
     /// AND Memory with Accumulator
     /// </summary>
     /// <returns></returns>
-    uint AND() => 0;
+    uint AND()
+    {
+        A &= FetchData();
+        SetFlag(StatusFlag.Zero, A == 0 );
+        // 1000 0000
+        SetFlag( StatusFlag.Negative, (A & (uint)StatusFlag.Negative) > 0 );
+        
+        return 1; // additional clock cycle
+    }
 
     uint BRK() => 0;
 

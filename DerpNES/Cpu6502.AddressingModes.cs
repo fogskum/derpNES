@@ -1,6 +1,6 @@
 ﻿namespace DerpNES;
 
-internal partial class Olc6502
+public partial class Cpu6502
 {
     // addressing modes: https://blogs.oregonstate.edu/ericmorgan/2022/01/21/6502-addressing-modes/
 

@@ -1,6 +1,6 @@
 ﻿namespace DerpNES;
 
-internal interface IBus
+public interface IBus
 {
     void Write( uint address, uint data );
 

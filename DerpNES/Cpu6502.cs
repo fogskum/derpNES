@@ -11,7 +11,7 @@ namespace DerpNES;
 /// <summary>
 /// Emulates the MOS Technology 6502
 /// </summary>
-internal sealed partial class Olc6502
+public sealed partial class Cpu6502
 {
     internal enum InterruptType
     {
@@ -21,7 +21,7 @@ internal sealed partial class Olc6502
     }
 
     // bits of the status register
-    internal enum StatusFlag
+    public enum StatusFlag : uint
     {
         Carry = (1 << 0),
         Zero = (1 << 1),
@@ -32,6 +32,11 @@ internal sealed partial class Olc6502
         Overflow = (1 << 6),
         Negative = (1 << 7),
     }
+
+    // We can interregate the CPU state - was the last result zero? Has there been a carry operation?
+    // We can also enable/disble interrupts.
+    // bit, but we just a Uint8
+    uint FlagStatus = 0x00;
 
     // registers
 
@@ -47,11 +52,7 @@ internal sealed partial class Olc6502
     // Increases with each clock or can be directly set in a branch to jump to
     // Different parts of the program, like a if-statement
     uint ProgramCounter = 0x0000;
-    
-    // We can interregate the CPU state - was the last result zero? Has there been a carry operation?
-    // We can also enable/disble interrupts.
-    // bit, but we just a Uint8
-    uint Status = 0x00;
+   
 
     /// <summary>
     /// Perform one clock cycle
@@ -63,8 +64,8 @@ internal sealed partial class Olc6502
             // get opcode for current location => will increase PC
             _currentInstruction = NextByte();
             _cycles = _instructions[_currentInstruction].Cycles;
-            uint cycle1 = _instructions[_currentInstruction].AddressMode();
-            uint cycle2 = _instructions[_currentInstruction].Operate();
+            var cycle1 = _instructions[_currentInstruction].AddressMode();
+            var cycle2 = _instructions[_currentInstruction].Operate();
             // check if we need additional cycles
             _cycles += (cycle1 & cycle2);
         }
@@ -77,7 +78,15 @@ internal sealed partial class Olc6502
     void InterruptRequest() { }
     void NonMaskableInterrupt() { }
 
-    uint FetchData() => throw new NotImplementedException();
+    uint FetchData()
+    {
+        if(_instructions[_currentInstruction].AddressMode != Implied)
+        {
+            _fetchedData = ReadByte( _address_abs );
+        }
+        return _fetchedData;
+    }
+
     uint _fetchedData = 0x00;
     uint _address_abs = 0x0000;
     uint _address_rel = 0x0000;
@@ -88,7 +97,7 @@ internal sealed partial class Olc6502
 
     IBus Bus { get; set; } = null!;
 
-    public Olc6502()
+    public Cpu6502()
     {
         var instructions = ImmutableArray.Create( 
          new Instruction( Opcode: 0x00, Operate: BRK, AddressMode: Immediate, Cycles: 7 ),
@@ -112,8 +121,20 @@ internal sealed partial class Olc6502
     uint NextByte() => ReadByte( ProgramCounter++ );
     uint NextWord() => NextByte() | (NextByte() << 8);
 
-    uint GetFlag( StatusFlag flag ) => throw new NotImplementedException();
-    void SetFlag( StatusFlag flag, bool v ) => throw new NotImplementedException();
+    public bool GetFlag( StatusFlag flagBit ) => (FlagStatus & (uint)flagBit) > 0 ? true : false;
+
+    public void SetFlag( StatusFlag flagBit, bool set )
+    {
+        if(set)
+        {
+            FlagStatus |= (uint)flagBit;
+        }
+        else
+        {
+            // clear flag
+            FlagStatus &= ~(uint)flagBit;
+        }
+    }
 
     public uint ReadByte( uint address ) => Bus.Read( address );
     public void WriteByte( uint address, uint data ) => Bus.Write( address, data );
