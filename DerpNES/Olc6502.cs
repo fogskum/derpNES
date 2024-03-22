@@ -2,6 +2,12 @@
 
 namespace DerpNES;
 
+// & = extract bit (and)
+// | = set bit (or)
+// << >> shift to correct location
+// ~& = clear bit (not)
+// ^ = toggle bit (xor)
+
 /// <summary>
 /// Emulates the MOS Technology 6502
 /// </summary>
@@ -15,7 +21,7 @@ internal sealed partial class Olc6502
     }
 
     // bits of the status register
-    internal enum StatusFlag : UInt8
+    internal enum StatusFlag
     {
         Carry = (1 << 0),
         Zero = (1 << 1),
@@ -29,23 +35,23 @@ internal sealed partial class Olc6502
 
     // registers
 
-    UInt8 A = 0x00;
-    UInt8 X = 0x00;
-    UInt8 Y = 0x00;
+    uint A = 0x00;
+    uint X = 0x00;
+    uint Y = 0x00;
 
     // Points to an address somewhere in the memory (bus)
     // Incremented/decremented as we pull things from the stack
-    UInt8 StackPointer = 0x00;
+    uint StackPointer = 0x00;
     
-    // Stores the address of the next progran byte
+    // Stores the address of the next progran uint
     // Increases with each clock or can be directly set in a branch to jump to
     // Different parts of the program, like a if-statement
-    UInt16 ProgramCounter = 0x0000;
+    uint ProgramCounter = 0x0000;
     
     // We can interregate the CPU state - was the last result zero? Has there been a carry operation?
     // We can also enable/disble interrupts.
     // bit, but we just a Uint8
-    UInt8 Status = 0x00;
+    uint Status = 0x00;
 
     /// <summary>
     /// Perform one clock cycle
@@ -54,10 +60,12 @@ internal sealed partial class Olc6502
     {
         if (_cycles == 0)
         {
-            _opcode = NextByte();
-            _cycles = _instructions[_opcode].Cycles;
-            uint cycle1 = _instructions[_opcode].AddressMode();
-            uint cycle2 = _instructions[_opcode].Operate();
+            // get opcode for current location => will increase PC
+            _currentInstruction = NextByte();
+            _cycles = _instructions[_currentInstruction].Cycles;
+            uint cycle1 = _instructions[_currentInstruction].AddressMode();
+            uint cycle2 = _instructions[_currentInstruction].Operate();
+            // check if we need additional cycles
             _cycles += (cycle1 & cycle2);
         }
         _cycles--;
@@ -69,10 +77,10 @@ internal sealed partial class Olc6502
     void InterruptRequest() { }
     void NonMaskableInterrupt() { }
 
-    UInt8 FetchData() => throw new NotImplementedException();
-    UInt8 _fetchedData = 0x00;
-    UInt16 _address_abs = 0x0000;
-    UInt16 _address_rel = 0x0000;
+    uint FetchData() => throw new NotImplementedException();
+    uint _fetchedData = 0x00;
+    uint _address_abs = 0x0000;
+    uint _address_rel = 0x0000;
     uint _cycles = 0;
 
     Dictionary<uint, Instruction> _instructions;
@@ -101,11 +109,12 @@ internal sealed partial class Olc6502
         this.Bus = bus;
     }
 
-    UInt8 NextByte() => ReadByte( ProgramCounter++ );
+    uint NextByte() => ReadByte( ProgramCounter++ );
+    uint NextWord() => NextByte() | (NextByte() << 8);
 
-    UInt8 GetFlag( StatusFlag flag ) => throw new NotImplementedException();
+    uint GetFlag( StatusFlag flag ) => throw new NotImplementedException();
     void SetFlag( StatusFlag flag, bool v ) => throw new NotImplementedException();
 
-    public UInt8 ReadByte( UInt16 address ) => Bus.Read( address );
-    public void WriteByte( UInt16 address, UInt8 data ) => Bus.Write( address, data );
+    public uint ReadByte( uint address ) => Bus.Read( address );
+    public void WriteByte( uint address, uint data ) => Bus.Write( address, data );
 }

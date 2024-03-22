@@ -1,3 +1,3 @@
 ﻿namespace DerpNES;
 
-internal record struct Instruction( uint Opcode, Func<UInt8> Operate, Func<UInt8> AddressMode, UInt8 Cycles );
+internal record struct Instruction( uint Opcode, Func<uint> Operate, Func<uint> AddressMode, uint Cycles );

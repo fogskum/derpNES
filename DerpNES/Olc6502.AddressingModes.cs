@@ -9,28 +9,28 @@ internal partial class Olc6502
     /// They require two cycles to complete.
     /// </summary>
     /// <returns></returns>
-    UInt8 Accumuator() => throw new NotImplementedException();
+    uint Accumuator() => throw new NotImplementedException();
 
     /// <summary>
-    /// With this addressing mode, two additional bytes are read after the op code address that make up a word.
+    /// With this addressing mode, two additional uints are read after the op code address that make up a word.
     /// This word defines a specific address against which to operate.
     /// These instructions can additionally be incremented by the value in the X or Y indexes.
     /// These instructions require 4 CPU cycles to complete. When indexing against the address, 
-    /// if incrementing the absolute address causes the address to cross pages (changes the value of the high byte) 
+    /// if incrementing the absolute address causes the address to cross pages (changes the value of the high uint) 
     /// then an additional cycle is required.
     /// </summary>
     /// <returns></returns>
-    UInt8 Absolute() => throw new NotImplementedException();
-    UInt8 AbsoluteX() => throw new NotImplementedException();
-    UInt8 AbsoluteY() => throw new NotImplementedException();
+    uint Absolute() => throw new NotImplementedException();
+    uint AbsoluteX() => throw new NotImplementedException();
+    uint AbsoluteY() => throw new NotImplementedException();
 
     /// <summary>
-    /// With this addressing mode 1 additional byte is read following the instruction.
-    /// This byte represents a specific value against which to operate.
+    /// With this addressing mode 1 additional uint is read following the instruction.
+    /// This uint represents a specific value against which to operate.
     /// This addressing mode requires 2 cycles.
     /// </summary>
     /// <returns></returns>
-    UInt8 Immediate()
+    uint Immediate()
     {
         _address_abs = NextByte();
         return 0;
@@ -43,7 +43,7 @@ internal partial class Olc6502
     /// This addressing mode requires 2 cycles to complete.
     /// </summary>
     /// <returns></returns>
-    UInt8 Implied()
+    uint Implied()
     {
         _fetchedData = A;
         return 0;
@@ -55,32 +55,32 @@ internal partial class Olc6502
     /// This addressing mode then reads the value at that location and returns this value. Indirect requires 5 cycles.
     /// </summary>
     /// <returns></returns>
-    UInt8 Indirect() => throw new NotImplementedException();
+    uint Indirect() => throw new NotImplementedException();
 
     /// <summary>
-    /// These are similar to the previous indirect, except a single byte is read following the instruction.
+    /// These are similar to the previous indirect, except a single uint is read following the instruction.
     /// This is then added to the zero page, and offset by the X or Y register.
     /// The word located at the calculated address is then returned.
     /// Indirect X increments without a carry operation, while Y is incremented and can carry.
     /// Indirect X uses 6 CPU cycles, while indirect Y uses 5. If indirect Y carries it uses 6 CPU cycles.
     /// </summary>
     /// <returns></returns>
-    UInt8 IndirectX() => throw new NotImplementedException();
-    UInt8 IndirectY() => throw new NotImplementedException();
+    uint IndirectX() => throw new NotImplementedException();
+    uint IndirectY() => throw new NotImplementedException();
 
     /// <summary>
     /// This addressing mode is used for branch operations.
-    /// When used, a single byte following the instruction is read.
-    /// This byte represents a signed integer that offsets from the current program counter.
+    /// When used, a single uint following the instruction is read.
+    /// This uint represents a signed integer that offsets from the current program counter.
     /// This instruction requires 2 cycles.
     /// If the offset causes the address to cross into a new page an additional cycle is required (for 3 total).
     /// </summary>
     /// <returns></returns>
-    UInt8 Relative() => throw new NotImplementedException();
+    uint Relative() => throw new NotImplementedException();
 
     /// <summary>
     /// This addressing mode targets values following a beginning of the memory (zeropage), and are very quick to run. 
-    /// When run a byte is read following the instruction representing an offset from the zero page.
+    /// When run a uint is read following the instruction representing an offset from the zero page.
     /// Zeropage X and Y additionally add the X or Y index (as applicable) to this offset.
     /// If the additional of the index causes the instruction to carry,
     /// the carry is dropped and the returned address instead just wraps back around to start at zero.
@@ -89,7 +89,7 @@ internal partial class Olc6502
     /// </summary>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    UInt8 ZeroPage() => throw new NotImplementedException();
-    UInt8 ZeroPageX() => throw new NotImplementedException();
-    UInt8 ZeroPageY() => throw new NotImplementedException();
+    uint ZeroPage() => throw new NotImplementedException();
+    uint ZeroPageX() => throw new NotImplementedException();
+    uint ZeroPageY() => throw new NotImplementedException();
 }

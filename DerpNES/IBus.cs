@@ -2,7 +2,7 @@
 
 internal interface IBus
 {
-    void Write( UInt16 address, UInt8 data );
+    void Write( uint address, uint data );
 
-    UInt8 Read( UInt16 address, bool readOnly = false );
+    uint Read( uint address, bool readOnly = false );
 }
