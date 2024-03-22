@@ -45,7 +45,7 @@ internal partial class Olc6502
     /// <returns></returns>
     UInt8 Implied()
     {
-        _fetchedData = Accumulator;
+        _fetchedData = A;
         return 0;
     }
 

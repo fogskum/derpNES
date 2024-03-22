@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DerpNES;
+﻿namespace DerpNES;
 
 // https://masswerk.at/6502/6502_instruction_set.html#LSR
 internal partial class Olc6502
@@ -20,14 +14,14 @@ internal partial class Olc6502
     /// Add with carry
     /// </summary>
     UInt8 ADC() => throw new NotImplementedException();
- 
+
     /// <summary>
-    /// Break / interrupt
+    /// AND Memory with Accumulator
     /// </summary>
     /// <returns></returns>
-    UInt8 BRK()
-    {
+    UInt8 AND() => 0;
 
-        return 0;
-    }
+    UInt8 BRK() => 0;
+
+    UInt8 ORA() => 0;
 }

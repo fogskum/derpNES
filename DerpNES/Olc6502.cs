@@ -5,9 +5,9 @@ namespace DerpNES;
 /// <summary>
 /// Emulates the MOS Technology 6502
 /// </summary>
-internal sealed partial class Olc6502 : ICpu
+internal sealed partial class Olc6502
 {
-    public enum InterruptType
+    internal enum InterruptType
     {
         NonMaskableInterrupt,
         InterruptRequest,
@@ -15,7 +15,7 @@ internal sealed partial class Olc6502 : ICpu
     }
 
     // bits of the status register
-    public enum StatusFlag : byte
+    internal enum StatusFlag : UInt8
     {
         Carry = (1 << 0),
         Zero = (1 << 1),
@@ -28,11 +28,23 @@ internal sealed partial class Olc6502 : ICpu
     }
 
     // registers
-    UInt8 Accumulator = 0x00;
+
+    UInt8 A = 0x00;
     UInt8 X = 0x00;
     UInt8 Y = 0x00;
-    UInt8 StackPointer = 0x00; // points to location on bus
+
+    // Points to an address somewhere in the memory (bus)
+    // Incremented/decremented as we pull things from the stack
+    UInt8 StackPointer = 0x00;
+    
+    // Stores the address of the next progran byte
+    // Increases with each clock or can be directly set in a branch to jump to
+    // Different parts of the program, like a if-statement
     UInt16 ProgramCounter = 0x0000;
+    
+    // We can interregate the CPU state - was the last result zero? Has there been a carry operation?
+    // We can also enable/disble interrupts.
+    // bit, but we just a Uint8
     UInt8 Status = 0x00;
 
     /// <summary>
@@ -59,7 +71,7 @@ internal sealed partial class Olc6502 : ICpu
 
     UInt8 FetchData() => throw new NotImplementedException();
     UInt8 _fetchedData = 0x00;
-    uint _address_abs = 0x0000;
+    UInt16 _address_abs = 0x0000;
     UInt16 _address_rel = 0x0000;
     uint _cycles = 0;
 
@@ -70,9 +82,17 @@ internal sealed partial class Olc6502 : ICpu
 
     public Olc6502()
     {
-        var instructions = ImmutableArray.Create(
-         new Instruction( Opcode: 0x00, Operate: BRK, AddressMode: Immediate, Cycles: 7 ) );
-
+        var instructions = ImmutableArray.Create( 
+         new Instruction( Opcode: 0x00, Operate: BRK, AddressMode: Immediate, Cycles: 7 ),
+         new Instruction( Opcode: 0x09, Operate: ORA, AddressMode: Immediate, Cycles: 2 ),
+         new Instruction( Opcode: 0x05, Operate: ORA, AddressMode: ZeroPage, Cycles: 3 ),
+         new Instruction( Opcode: 0x15, Operate: ORA, AddressMode: ZeroPageX, Cycles: 4 ),
+         new Instruction( Opcode: 0x0D, Operate: ORA, AddressMode: Absolute, Cycles: 4 ),
+         new Instruction( Opcode: 0x1D, Operate: ORA, AddressMode: AbsoluteX, Cycles: 4 ),
+         new Instruction( Opcode: 0x19, Operate: ORA, AddressMode: AbsoluteY, Cycles: 4 ),
+         new Instruction( Opcode: 0x01, Operate: ORA, AddressMode: IndirectX, Cycles: 6 ),
+         new Instruction( Opcode: 0x11, Operate: ORA, AddressMode: IndirectY, Cycles: 5 )
+        );
         _instructions = instructions.ToDictionary( k => k.Opcode, v => v );
     }
 
@@ -81,7 +101,7 @@ internal sealed partial class Olc6502 : ICpu
         this.Bus = bus;
     }
 
-    uint NextByte() => ReadByte( ProgramCounter++ );
+    UInt8 NextByte() => ReadByte( ProgramCounter++ );
 
     UInt8 GetFlag( StatusFlag flag ) => throw new NotImplementedException();
     void SetFlag( StatusFlag flag, bool v ) => throw new NotImplementedException();
