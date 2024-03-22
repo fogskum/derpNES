@@ -2,12 +2,13 @@
 
 public class Emulator
 {
-    readonly Cpu6502 cpu = new Cpu6502();
+    readonly Cpu6502 cpu = null!;
     readonly IBus bus = new Bus();
 
     public Emulator()
     {
-        cpu.ConnectBus(bus);
+        bus = new Bus();
+        cpu = new Cpu6502(bus);
     }
 
     public void Run()

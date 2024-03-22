@@ -21,4 +21,14 @@ public class InstructionTests
         flagStatus = cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         Assert.That( flagStatus, Is.EqualTo( false ) );
     }
+
+    [Test]
+    public void Test_AND()
+    {
+        var bus = new Bus();
+        var cpu = new Cpu6502();
+        var cycles = cpu.AND();
+
+        
+    }
 }

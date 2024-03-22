@@ -17,7 +17,7 @@ public partial class Cpu6502
     /// AND Memory with Accumulator
     /// </summary>
     /// <returns></returns>
-    uint AND()
+    public uint AND()
     {
         A &= FetchData();
         SetFlag(StatusFlag.Zero, A == 0 );

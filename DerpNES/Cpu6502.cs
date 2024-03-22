@@ -82,22 +82,22 @@ public sealed partial class Cpu6502
     {
         if(_instructions[_currentInstruction].AddressMode != Implied)
         {
-            _fetchedData = ReadByte( _address_abs );
+            _fetchedData = ReadByte( _addressAbsolute );
         }
         return _fetchedData;
     }
 
     uint _fetchedData = 0x00;
-    uint _address_abs = 0x0000;
+    uint _addressAbsolute = 0x0000;
     uint _address_rel = 0x0000;
     uint _cycles = 0;
 
     Dictionary<uint, Instruction> _instructions;
     uint _currentInstruction;
 
-    IBus Bus { get; set; } = null!;
+    private readonly IBus bus;
 
-    public Cpu6502()
+    public Cpu6502( IBus bus )
     {
         var instructions = ImmutableArray.Create( 
          new Instruction( Opcode: 0x00, Operate: BRK, AddressMode: Immediate, Cycles: 7 ),
@@ -111,11 +111,7 @@ public sealed partial class Cpu6502
          new Instruction( Opcode: 0x11, Operate: ORA, AddressMode: IndirectY, Cycles: 5 )
         );
         _instructions = instructions.ToDictionary( k => k.Opcode, v => v );
-    }
-
-    public void ConnectBus( IBus bus )
-    {
-        this.Bus = bus;
+        this.bus = bus;
     }
 
     uint NextByte() => ReadByte( ProgramCounter++ );

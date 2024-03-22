@@ -32,14 +32,14 @@ public partial class Cpu6502
     /// <returns></returns>
     uint Immediate()
     {
-        _address_abs = NextByte();
+        _addressAbsolute = ProgramCounter++;
         return 0;
     }
 
     /// <summary>
     /// The implied addressing mode basically means there is no addressing mode.
     /// These are instructions that operate against specific areas of memory.
-    /// This are op codes like BRK and those that change processer flags directly.
+    /// These are op codes like BRK and those that change processer flags directly.
     /// This addressing mode requires 2 cycles to complete.
     /// </summary>
     /// <returns></returns>
@@ -49,13 +49,31 @@ public partial class Cpu6502
         return 0;
     }
 
-    /// <summary>
-    /// These instructions return a value located at a specific address.
-    /// When this addressing mode is run, a word is read following the instruction which represents a memory location.
-    /// This addressing mode then reads the value at that location and returns this value. Indirect requires 5 cycles.
-    /// </summary>
-    /// <returns></returns>
-    uint Indirect() => throw new NotImplementedException();
+    // Address Mode: Indirect
+    // The supplied 16-bit address is read to get the actual 16-bit address. This is
+    // instruction is unusual in that it has a bug in the hardware! To emulate its
+    // function accurately, we also need to emulate this bug. If the low byte of the
+    // supplied address is 0xFF, then to read the high byte of the actual address
+    // we need to cross a page boundary. This doesnt actually work on the chip as 
+    // designed, instead it wraps back around in the same page, yielding an 
+    // invalid actual address
+    uint Indirect()
+    {
+        var low = NextByte();
+        var hight = NextByte();
+        var ptr = (hight << 8) | low;
+        if (ptr == 0x00FF) 
+        {
+            // Simulate page boundary hardware bug
+            _addressAbsolute = (ReadByte( ptr & 0xFF00 ) << 8) | ReadByte( ptr + 0 );
+        }
+        else
+        {
+            // Behave normally
+            _addressAbsolute = (ReadByte( ptr + 1 ) << 8) | ReadByte( ptr + 0 );
+        }
+        return 0;
+    }
 
     /// <summary>
     /// These are similar to the previous indirect, except a single uint is read following the instruction.
