@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
+using System.Net;
 using System.Text;
 
 namespace DerpNES;
@@ -66,6 +67,7 @@ public sealed partial class Cpu6502
     }
 
     Instruction GetCurrentInstruction() => _instructions[_currentInstructionAddress];
+    Instruction GetInstruction(uint address) => _instructions[address];
 
     void LogState()
     {
@@ -94,14 +96,14 @@ public sealed partial class Cpu6502
         logger.LogInformation( sb.ToString() );
     }
 
+    // todo: this method should take an address from where instruction should be executed
     /// <summary>
-    /// Executes one instruction
+    /// Executes one instruction.
     /// </summary>
     public int ExecuteInstruction()
     {
-        if( _cycles == 0 )
+        if (_cycles == 0)
         {
-            // get opcode for current location => will increase PC
             _currentInstructionAddress = NextByte();
             var instruction = GetCurrentInstruction();
             _cycles = (int)instruction.Cycles;
