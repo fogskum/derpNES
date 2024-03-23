@@ -2,6 +2,8 @@
 
 public static class UIntExtensions
 {
+    public static string ToHex( this uint value ) => $"0x{value.ToString("X4")}";
+
     public static string ToBinary( this uint value ) => Convert.ToString( value, 2 );
 
     public static uint ShiftRight( this uint value, int pos )

@@ -1,4 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using Microsoft.Extensions.Logging;
+using System.Collections.Immutable;
+using System.Text;
 
 namespace DerpNES;
 
@@ -55,18 +57,56 @@ public sealed partial class Cpu6502
     // Different parts of the program, like a if-statement
     uint PC = 0x0000;
 
+    public void Step()
+    {
+        // todo: future PPU stuff
+
+        ExecuteInstruction();
+        LogState();
+    }
+
+    Instruction GetCurrentInstruction() => _instructions[_currentInstructionAddress];
+
+    void LogState()
+    {
+        var sb = new StringBuilder();
+
+        var instruction = GetCurrentInstruction();
+        sb.AppendLine( $"Instruction: {instruction.Opcode.ToHex()}" );
+
+        sb.AppendLine( "Registers" );
+        sb.Append( $"A: {A.ToHex()}, " );
+        sb.Append( $"X: {X.ToHex()}, " );
+        sb.Append( $"Y: {Y.ToHex()}, " );
+        sb.Append( $"PC: {PC.ToHex()}, " );
+        sb.Append( $"SP: {SP.ToHex()}" );
+        sb.AppendLine();
+
+        var Z = GetFlag( StatusFlag.Zero ) ? 1 : 0;
+        var N = GetFlag( StatusFlag.Negative ) ? 1 : 0;
+        var C = GetFlag( StatusFlag.Carry ) ? 1 : 0;
+        var V = GetFlag( StatusFlag.Overflow ) ? 1 : 0;
+        var I = GetFlag( StatusFlag.DisableInterrupts ) ? 1 : 0;
+        var D = GetFlag( StatusFlag.DecimalMode ) ? 1 : 0;
+        var B = GetFlag( StatusFlag.Break ) ? 1 : 0;
+        sb.AppendLine( "Flags" );
+        sb.Append( $"Z:{Z}, N:{N}, C:{C}, V:{V}, I:{I}, D:{D}, B:{B}" );
+        logger.LogInformation( sb.ToString() );
+    }
+
     /// <summary>
     /// Perform one clock cycle
     /// </summary>
-    public void Execute()
+    public void ExecuteInstruction()
     {
         if( _cycles == 0 )
         {
             // get opcode for current location => will increase PC
-            _currentInstruction = NextByte();
-            _cycles = _instructions[_currentInstruction].Cycles;
-            var cycle1 = _instructions[_currentInstruction].AddressMode();
-            var cycle2 = _instructions[_currentInstruction].Operate();
+            _currentInstructionAddress = NextByte();
+            var instruction = GetCurrentInstruction();
+            _cycles = instruction.Cycles;
+            var cycle1 = instruction.AddressMode();
+            var cycle2 = instruction.Operate();
             // check if we need additional cycles
             _cycles += (cycle1 & cycle2);
         }
@@ -92,7 +132,7 @@ public sealed partial class Cpu6502
 
     uint FetchData()
     {
-        if (_instructions[_currentInstruction].AddressMode != Implied)
+        if (_instructions[_currentInstructionAddress].AddressMode != Implied)
         {
             _fetchedData = ReadByte( _addressAbsolute );
         }
@@ -105,11 +145,12 @@ public sealed partial class Cpu6502
     uint _cycles = 0;
 
     Dictionary<uint, Instruction> _instructions;
-    uint _currentInstruction;
+    uint _currentInstructionAddress;
 
     private readonly IBus memory = new Memory();
+    private readonly ILogger<Cpu6502> logger;
 
-    public Cpu6502()
+    public Cpu6502(ILogger<Cpu6502> logger)
     {
         var instructions = ImmutableArray.Create(
          new Instruction( Opcode: 0x00, Operate: BRK, AddressMode: Immediate, Cycles: 7 ),
@@ -131,6 +172,7 @@ public sealed partial class Cpu6502
          new Instruction( Opcode: 0xB1, Operate: LDA, AddressMode: IndirectY, Cycles: 5 )
         );
         _instructions = instructions.ToDictionary( k => k.Opcode, v => v );
+        this.logger = logger;
     }
 
     public uint ReadByte( uint address ) => memory.Read( address );

@@ -2,16 +2,14 @@
 
 public class Emulator
 {
-    readonly Cpu6502 cpu;
+    public readonly Cpu6502 Cpu;
 
-    public Emulator()
+    public Emulator(Cpu6502 cpu)
     {
-        this.cpu = new Cpu6502();
+        Cpu = cpu;
     }
 
-    public void Run()
-    {
-        cpu.Reset();
-        cpu.Execute();
-    }
+    public void Reset() => Cpu.Reset();
+
+    public void Step() => Cpu.Step();
 }
