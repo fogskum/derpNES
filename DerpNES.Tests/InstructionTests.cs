@@ -31,7 +31,7 @@ public class InstructionTests
     public void Test_LDA_Immediate_LoadsValue()
     {
         // arrange
-        byte A = 0xAB;
+        u8 A = 42;
         
         var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
@@ -42,10 +42,12 @@ public class InstructionTests
         // act
         _cpu.ExecuteInstruction();
 
-        // assert registers
+        // assert
+        
+        // registers
         Assert.That( A, Is.EqualTo( _cpu.A ) );
 
-        // todo: assert flags
+        // todo: assert all flags
         Assert.That( Z, Is.EqualTo( _cpu.GetFlag(Cpu6502.StatusFlag.Zero) ) );
         Assert.That( N, Is.EqualTo( _cpu.GetFlag(Cpu6502.StatusFlag.Negative) ) );
     }

@@ -2,7 +2,7 @@
 
 public interface IBus
 {
-    void Write( uint address, uint data );
+    void Write( u16 address, u8 data );
 
-    uint Read( uint address, bool readOnly = false );
+    u8 Read( u16 address, bool readOnly = false );
 }

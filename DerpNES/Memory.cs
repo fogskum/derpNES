@@ -4,7 +4,7 @@ public class Memory : IBus
 {
     readonly uint _addressRange = 0xFFFF;
 
-    uint[] ram = new uint[1024 * 64];
+    u8[] ram = new u8[1024 * 64];
 
     public Memory()
     {
@@ -14,9 +14,9 @@ public class Memory : IBus
         }
     }
 
-    bool InAddressRange( uint address ) => address <= _addressRange;
+    bool InAddressRange( u16 address ) => address <= _addressRange;
 
-    public void Write( uint address, uint data )
+    public void Write(u16 address, u8 data )
     {
         if (InAddressRange( address ))
         {
@@ -24,7 +24,7 @@ public class Memory : IBus
         }
     }
 
-    public uint Read( uint address, bool readOnly = false )
+    public u8 Read( u16 address, bool readOnly = false )
     {
         if (InAddressRange( address ))
         {

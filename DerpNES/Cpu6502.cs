@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
-using System.Net;
 using System.Text;
 
 namespace DerpNES;
@@ -24,7 +23,7 @@ public sealed partial class Cpu6502
     }
 
     // bits of the status register
-    public enum StatusFlag : uint
+    public enum StatusFlag : u8
     {
         Carry = (1 << 0),
         Zero = (1 << 1),
@@ -39,24 +38,24 @@ public sealed partial class Cpu6502
     // We can interregate the CPU state - was the last result zero? Has there been a carry operation?
     // We can also enable/disble interrupts.
     // bit, but we just a Uint8
-    uint FlagStatus = 0x00;
+    u8 FlagStatus;
 
     // registers
 
-    public uint A { get; private set; } = 0x00;
-    uint X = 0x00;
-    uint Y = 0x00;
+    public u8 A { get; private set; }
+    public u8 X { get; private set; }
+    public u8 Y { get; private set; }
 
     // Stack pointer
     // Points to an address somewhere in the memory (bus)
     // Incremented/decremented as we pull things from the stack
-    uint SP = 0x00;
+    public u16 SP { get; private set; }
 
     // Program counter
     // Stores the address of the next progran uint
     // Increases with each clock or can be directly set in a branch to jump to
     // Different parts of the program, like a if-statement
-    uint PC = 0x0000;
+    public u16 PC { get; private set; } = 0x0000;
 
     public void Step()
     {
@@ -67,7 +66,7 @@ public sealed partial class Cpu6502
     }
 
     Instruction GetCurrentInstruction() => _instructions[_currentInstructionAddress];
-    Instruction GetInstruction(uint address) => _instructions[address];
+    Instruction GetInstruction(u8 address) => _instructions[address];
 
     void LogState()
     {
@@ -134,7 +133,7 @@ public sealed partial class Cpu6502
     
     void NonMaskableInterrupt() { }
 
-    uint FetchData()
+    u8 FetchData()
     {
         if (_instructions[_currentInstructionAddress].AddressMode != Implied)
         {
@@ -143,13 +142,13 @@ public sealed partial class Cpu6502
         return _fetchedData;
     }
 
-    uint _fetchedData = 0x00;
-    uint _addressAbsolute = 0x0000;
-    uint _address_rel = 0x0000;
+    u8 _fetchedData = 0x00;
+    u16 _addressAbsolute = 0x0000;
+    u16 _addressRelative = 0x0000;
     int _cycles = 0;
 
-    Dictionary<uint, Instruction> _instructions;
-    uint _currentInstructionAddress;
+    Dictionary<u8, Instruction> _instructions;
+    u8 _currentInstructionAddress;
 
     private readonly IBus memory = new Memory();
     private readonly ILogger<Cpu6502> logger;
@@ -179,14 +178,14 @@ public sealed partial class Cpu6502
         this.logger = logger;
     }
 
-    public uint ReadByte( uint address ) => memory.Read( address );
-    public void WriteByte( uint address, uint data ) => memory.Write( address, data );
+    public u8 ReadByte( u16 address ) => memory.Read( address );
+    public void WriteByte( u16 address, u8 data ) => memory.Write( address, data );
     
-    uint NextByte() => ReadByte( PC++ );
+    u8 NextByte() => ReadByte( PC++ );
 
     // 6502 is little endian
-    uint NextWord() => NextByte() | (NextByte() << 8);
-    uint ReadWord() => ReadByte( PC ) | (ReadByte(PC) << 8);
+    u16 NextWord() => (u16)(NextByte() | (NextByte() << 8));
+    u16 ReadWord() => (u16)(ReadByte( PC ) | (ReadByte(PC) << 8));
 
     public bool GetFlag( StatusFlag flagBit )
         => (FlagStatus & (uint)flagBit) > 0 ? true : false;
@@ -195,12 +194,12 @@ public sealed partial class Cpu6502
     {
         if (set)
         {
-            FlagStatus |= (uint)flagBit;
+            FlagStatus |= (u8)flagBit;
         }
         else
         {
             // clear flag
-            FlagStatus &= (uint)~flagBit;
+            FlagStatus &= (u8)~flagBit;
         }
     }
 }

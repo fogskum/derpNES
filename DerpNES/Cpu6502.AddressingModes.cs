@@ -9,7 +9,7 @@ public partial class Cpu6502
     /// They require two cycles to complete.
     /// </summary>
     /// <returns></returns>
-    uint Accumuator() => throw new NotImplementedException();
+    u8 Accumuator() => throw new NotImplementedException();
 
     /// <summary>
     /// With this addressing mode, two additional uints are read after the op code address that make up a word.
@@ -20,9 +20,9 @@ public partial class Cpu6502
     /// then an additional cycle is required.
     /// </summary>
     /// <returns></returns>
-    uint Absolute() => throw new NotImplementedException();
-    uint AbsoluteX() => throw new NotImplementedException();
-    uint AbsoluteY() => throw new NotImplementedException();
+    u8 Absolute() => throw new NotImplementedException();
+    u8 AbsoluteX() => throw new NotImplementedException();
+    u8 AbsoluteY() => throw new NotImplementedException();
 
     /// <summary>
     /// With this addressing mode 1 additional uint is read following the instruction.
@@ -30,7 +30,7 @@ public partial class Cpu6502
     /// This addressing mode requires 2 cycles.
     /// </summary>
     /// <returns></returns>
-    uint Immediate()
+    u8 Immediate()
     {
         _addressAbsolute = PC;
         return 0;
@@ -43,7 +43,7 @@ public partial class Cpu6502
     /// This addressing mode requires 2 cycles to complete.
     /// </summary>
     /// <returns></returns>
-    uint Implied()
+    u8 Implied()
     {
         _fetchedData = A;
         return 0;
@@ -57,20 +57,20 @@ public partial class Cpu6502
     // we need to cross a page boundary. This doesnt actually work on the chip as 
     // designed, instead it wraps back around in the same page, yielding an 
     // invalid actual address
-    uint Indirect()
+    u8 Indirect()
     {
         var low = NextByte();
         var hight = NextByte();
-        var ptr = (hight << 8) | low;
-        if (ptr == 0x00FF) 
+        u16 ptr = (u16)((hight << 8) | low);
+        if (ptr == 0x00FF)
         {
             // Simulate page boundary hardware bug
-            _addressAbsolute = (ReadByte( ptr & 0xFF00 ) << 8) | ReadByte( ptr + 0 );
+            _addressAbsolute = (u16)((ReadByte( (u16)(ptr & 0xFF00) ) << 8) | ReadByte( (u16)(ptr + 0) ));
         }
         else
         {
             // Behave normally
-            _addressAbsolute = (ReadByte( ptr + 1 ) << 8) | ReadByte( ptr + 0 );
+            _addressAbsolute = (u16)((ReadByte( (u16)(ptr + 1) ) << 8) | ReadByte( (u16)(ptr + 0) ));
         }
         return 0;
     }
@@ -83,8 +83,8 @@ public partial class Cpu6502
     /// Indirect X uses 6 CPU cycles, while indirect Y uses 5. If indirect Y carries it uses 6 CPU cycles.
     /// </summary>
     /// <returns></returns>
-    uint IndirectX() => throw new NotImplementedException();
-    uint IndirectY() => throw new NotImplementedException();
+    u8 IndirectX() => throw new NotImplementedException();
+    u8 IndirectY() => throw new NotImplementedException();
 
     /// <summary>
     /// This addressing mode is used for branch operations.
@@ -94,7 +94,7 @@ public partial class Cpu6502
     /// If the offset causes the address to cross into a new page an additional cycle is required (for 3 total).
     /// </summary>
     /// <returns></returns>
-    uint Relative() => throw new NotImplementedException();
+    u8 Relative() => throw new NotImplementedException();
 
     /// <summary>
     /// This addressing mode targets values following a beginning of the memory (zeropage), and are very quick to run. 
@@ -107,13 +107,13 @@ public partial class Cpu6502
     /// </summary>
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
-    uint ZeroPage()
+    u8 ZeroPage()
     {
-        _addressAbsolute = NextByte() & 0x00FF;
+        _addressAbsolute = (u8)(NextByte() & 0x00FF);
 
         return 0;
     }
 
-    uint ZeroPageX() => throw new NotImplementedException();
-    uint ZeroPageY() => throw new NotImplementedException();
+    u8 ZeroPageX() => throw new NotImplementedException();
+    u8 ZeroPageY() => throw new NotImplementedException();
 }

@@ -2,16 +2,16 @@
 
 public class RAM : IBus
 {
-    const uint size = 2048;
-    readonly uint[] ram = new uint[size];
+    const u16 size = 2048;
+    readonly u8[] ram = new u8[size];
 
-    public uint Read( uint address, bool readOnly = false )
+    public u8 Read( u16 address, bool readOnly = false )
     {
-        address %= 2048;
+        address %= size;
         return ram[address];
     }
 
-    public void Write( uint address, uint data )
+    public void Write( u16 address, u8 data )
     {
         address %= size;
         ram[address] = data;
