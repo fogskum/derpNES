@@ -5,34 +5,48 @@ namespace DerpNES.Tests;
 public class InstructionTests
 {
     ILogger<Cpu6502> _logger;
+    Cpu6502 _cpu;
 
     [SetUp]
     public void Setup()
     {
         _logger = new NullLogger<Cpu6502>();
+        _cpu = new Cpu6502( _logger );
     }
 
     [Test]
-    public void TestFlags()
+    public void Test_Flag_Get_And_Set()
     {
-        var cpu = new Cpu6502(_logger);
-
-        cpu.SetFlag( Cpu6502.StatusFlag.Zero, true );
-        cpu.SetFlag( Cpu6502.StatusFlag.Negative, true );
-        var flagStatus = cpu.GetFlag( Cpu6502.StatusFlag.Zero );
+        _cpu.SetFlag( Cpu6502.StatusFlag.Zero, true );
+        _cpu.SetFlag( Cpu6502.StatusFlag.Negative, true );
+        var flagStatus = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         Assert.That( flagStatus, Is.EqualTo( true ) );
-        
-        cpu.SetFlag( Cpu6502.StatusFlag.Zero, false );
-        flagStatus = cpu.GetFlag( Cpu6502.StatusFlag.Zero );
+
+        _cpu.SetFlag( Cpu6502.StatusFlag.Zero, false );
+        flagStatus = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         Assert.That( flagStatus, Is.EqualTo( false ) );
     }
 
     [Test]
-    public void Test_AND()
+    public void Test_LDA_Immediate_LoadsValue()
     {
-        var cpu = new Cpu6502(_logger);
-        var cycles = cpu.AND();
+        // arrange
+        byte A = 0xAB;
+        
+        var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
+        var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
 
-        Assert.Pass();
+        _cpu.WriteByte( 0x0000, 0xA9 ); // LDA immediate instruction
+        _cpu.WriteByte( 0x0001, A );
+
+        // act
+        _cpu.ExecuteInstruction();
+
+        // assert registers
+        Assert.That( A, Is.EqualTo( _cpu.A ) );
+
+        // todo: assert flags
+        Assert.That( Z, Is.EqualTo( _cpu.GetFlag(Cpu6502.StatusFlag.Zero) ) );
+        Assert.That( N, Is.EqualTo( _cpu.GetFlag(Cpu6502.StatusFlag.Negative) ) );
     }
 }

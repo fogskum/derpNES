@@ -42,7 +42,7 @@ public sealed partial class Cpu6502
 
     // registers
 
-    uint A = 0x00;
+    public uint A { get; private set; } = 0x00;
     uint X = 0x00;
     uint Y = 0x00;
 
@@ -95,22 +95,24 @@ public sealed partial class Cpu6502
     }
 
     /// <summary>
-    /// Perform one clock cycle
+    /// Executes one instruction
     /// </summary>
-    public void ExecuteInstruction()
+    public int ExecuteInstruction()
     {
         if( _cycles == 0 )
         {
             // get opcode for current location => will increase PC
             _currentInstructionAddress = NextByte();
             var instruction = GetCurrentInstruction();
-            _cycles = instruction.Cycles;
+            _cycles = (int)instruction.Cycles;
             var cycle1 = instruction.AddressMode();
             var cycle2 = instruction.Operate();
             // check if we need additional cycles
-            _cycles += (cycle1 & cycle2);
+            _cycles += (int)(cycle1 & cycle2);
         }
         _cycles--;
+
+        return _cycles;
     }
 
     // press reset on the NES
@@ -142,7 +144,7 @@ public sealed partial class Cpu6502
     uint _fetchedData = 0x00;
     uint _addressAbsolute = 0x0000;
     uint _address_rel = 0x0000;
-    uint _cycles = 0;
+    int _cycles = 0;
 
     Dictionary<uint, Instruction> _instructions;
     uint _currentInstructionAddress;
@@ -153,23 +155,23 @@ public sealed partial class Cpu6502
     public Cpu6502(ILogger<Cpu6502> logger)
     {
         var instructions = ImmutableArray.Create(
-         new Instruction( Opcode: 0x00, Operate: BRK, AddressMode: Immediate, Cycles: 7 ),
-         new Instruction( Opcode: 0x09, Operate: ORA, AddressMode: Immediate, Cycles: 2 ),
-         new Instruction( Opcode: 0x05, Operate: ORA, AddressMode: ZeroPage, Cycles: 3 ),
-         new Instruction( Opcode: 0x15, Operate: ORA, AddressMode: ZeroPageX, Cycles: 4 ),
-         new Instruction( Opcode: 0x0D, Operate: ORA, AddressMode: Absolute, Cycles: 4 ),
-         new Instruction( Opcode: 0x1D, Operate: ORA, AddressMode: AbsoluteX, Cycles: 4 ),
-         new Instruction( Opcode: 0x19, Operate: ORA, AddressMode: AbsoluteY, Cycles: 4 ),
-         new Instruction( Opcode: 0x01, Operate: ORA, AddressMode: IndirectX, Cycles: 6 ),
-         new Instruction( Opcode: 0x11, Operate: ORA, AddressMode: IndirectY, Cycles: 5 ),
-         new Instruction( Opcode: 0xA9, Operate: LDA, AddressMode: Immediate, Cycles: 2 ),
-         new Instruction( Opcode: 0xA5, Operate: LDA, AddressMode: ZeroPage, Cycles: 3 ),
-         new Instruction( Opcode: 0xB5, Operate: LDA, AddressMode: ZeroPageX, Cycles: 4 ),
-         new Instruction( Opcode: 0xAD, Operate: LDA, AddressMode: Absolute, Cycles: 4 ),
-         new Instruction( Opcode: 0xBD, Operate: LDA, AddressMode: AbsoluteX, Cycles: 4 ),
-         new Instruction( Opcode: 0xB9, Operate: LDA, AddressMode: AbsoluteY, Cycles: 4 ),
-         new Instruction( Opcode: 0xA1, Operate: LDA, AddressMode: IndirectX, Cycles: 6 ),
-         new Instruction( Opcode: 0xB1, Operate: LDA, AddressMode: IndirectY, Cycles: 5 )
+         new Instruction( Name: nameof(BRK), Opcode: 0x00, Operate: BRK, AddressMode: Immediate, Cycles: 7 ),
+         new Instruction( Name: nameof( ORA ), Opcode: 0x09, Operate: ORA, AddressMode: Immediate, Cycles: 2 ),
+         new Instruction( Name: nameof( ORA ), Opcode: 0x05, Operate: ORA, AddressMode: ZeroPage, Cycles: 3 ),
+         new Instruction( Name: nameof( ORA ), Opcode: 0x15, Operate: ORA, AddressMode: ZeroPageX, Cycles: 4 ),
+         new Instruction( Name: nameof( ORA ), Opcode: 0x0D, Operate: ORA, AddressMode: Absolute, Cycles: 4 ),
+         new Instruction( Name: nameof( ORA ), Opcode: 0x1D, Operate: ORA, AddressMode: AbsoluteX, Cycles: 4 ),
+         new Instruction( Name: nameof( ORA ), Opcode: 0x19, Operate: ORA, AddressMode: AbsoluteY, Cycles: 4 ),
+         new Instruction( Name: nameof( ORA ), Opcode: 0x01, Operate: ORA, AddressMode: IndirectX, Cycles: 6 ),
+         new Instruction( Name: nameof( ORA ), Opcode: 0x11, Operate: ORA, AddressMode: IndirectY, Cycles: 5 ),
+         new Instruction( Name: nameof( LDA ), Opcode: 0xA9, Operate: LDA, AddressMode: Immediate, Cycles: 2 ),
+         new Instruction( Name: nameof( LDA ), Opcode: 0xA5, Operate: LDA, AddressMode: ZeroPage, Cycles: 3 ),
+         new Instruction( Name: nameof( LDA ), Opcode: 0xB5, Operate: LDA, AddressMode: ZeroPageX, Cycles: 4 ),
+         new Instruction( Name: nameof( LDA ), Opcode: 0xAD, Operate: LDA, AddressMode: Absolute, Cycles: 4 ),
+         new Instruction( Name: nameof( LDA ), Opcode: 0xBD, Operate: LDA, AddressMode: AbsoluteX, Cycles: 4 ),
+         new Instruction( Name: nameof( LDA ), Opcode: 0xB9, Operate: LDA, AddressMode: AbsoluteY, Cycles: 4 ),
+         new Instruction( Name: nameof( LDA ), Opcode: 0xA1, Operate: LDA, AddressMode: IndirectX, Cycles: 6 ),
+         new Instruction( Name: nameof( LDA ), Opcode: 0xB1, Operate: LDA, AddressMode: IndirectY, Cycles: 5 )
         );
         _instructions = instructions.ToDictionary( k => k.Opcode, v => v );
         this.logger = logger;
