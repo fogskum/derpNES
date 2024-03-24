@@ -44,7 +44,7 @@ public sealed partial class Cpu6502
     // registers
 
     public u8 A { get; private set; }
-    public u8 X { get; private set; }
+    public u8 X { get; set; }
     public u8 Y { get; private set; }
 
     // Stack pointer
@@ -67,7 +67,7 @@ public sealed partial class Cpu6502
     }
 
     Instruction CurrentInstruction  => _instructions[_currentInstructionAddress];
-    Instruction GetInstruction(u8 address) => _instructions[address];
+    public Instruction GetInstruction(u8 address) => _instructions[address];
 
     void LogState()
     {
@@ -94,6 +94,8 @@ public sealed partial class Cpu6502
         sb.AppendLine( "Flags" );
         sb.Append( $"Z:{Z}, N:{N}, C:{C}, V:{V}, I:{I}, D:{D}, B:{B}" );
         logger.LogInformation( sb.ToString() );
+
+        System.Diagnostics.Debug.WriteLine( sb.ToString() );
     }
 
     // todo: this method should take an address from where instruction should be executed
@@ -102,18 +104,15 @@ public sealed partial class Cpu6502
     /// </summary>
     public int ExecuteInstruction()
     {
-        if (_cycles == 0)
-        {
-            _currentInstructionAddress = NextByte();
-            var instruction = CurrentInstruction;
-            _cycles = instruction.Cycles;
-            var additionalCycles1 = instruction.AddressMode();
-            var additionalCycles2 = instruction.Operate();
-            // check if we need additional cycles
-            _cycles += (additionalCycles1 & additionalCycles2);
-        }
-        _cycles--;
+        _currentInstructionAddress = NextByte();
 
+        var instruction = CurrentInstruction;
+        _cycles = instruction.Cycles;
+        var additionalCycles1 = instruction.AddressMode();
+        var additionalCycles2 = instruction.Operate();
+        // check if we need additional cycles
+        _cycles += (additionalCycles1 & additionalCycles2);
+        
         return _cycles;
     }
 
@@ -180,6 +179,7 @@ public sealed partial class Cpu6502
     }
 
     public u8 ReadByte( u16 address ) => memory.Read( address );
+    public u8 ReadByte() => ReadByte( PC );
     public void WriteByte( u16 address, u8 data ) => memory.Write( address, data );
     
     // read the next byte and prep next address

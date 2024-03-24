@@ -10,6 +10,9 @@ public partial class Cpu6502
 
     // In absolute addressing mode, the next two bytes after the instruction
     // represent the 16-bit absolute address to operate on
+    // Example: lowByte = 10110000, highByte = 10100000
+    // highByte << 8 = 1010000000000000
+    // lowByte | highByte = 1010000010110000 = 0xA0B0
     u8 Absolute()
     {
         u8 lowByte = NextByte();
@@ -23,7 +26,7 @@ public partial class Cpu6502
     {
         u8 lowByte = NextByte();
         u8 highByte = NextByte();
-        _operandAddress = (u16)(highByte | lowByte << 8);
+        _operandAddress = (u16)(lowByte | highByte << 8);
         _operandAddress += X;
 
         if ((u16)(_operandAddress & 0xFF00) != (u16)(highByte << 8))
@@ -37,7 +40,7 @@ public partial class Cpu6502
     {
         u8 lowByte = NextByte();
         u8 highByte = NextByte();
-        _operandAddress = (u16)(highByte | lowByte << 8);
+        _operandAddress = (u16)(lowByte | highByte << 8);
         _operandAddress += Y;
 
         if ((u16)(_operandAddress & 0xFF00) != (u16)(highByte << 8))
@@ -98,6 +101,7 @@ public partial class Cpu6502
     // Useful when you want to loop through some part of the address space.
     u8 ZeroPageX()
     {
+        // mask with 0x00FF to handle page wrap
         _operandAddress = (u16)((NextByte() + X) & 0x00FF);
 
         return 0;
