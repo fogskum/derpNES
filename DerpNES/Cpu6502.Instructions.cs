@@ -3,6 +3,12 @@
 // https://masswerk.at/6502/6502_instruction_set.html#LSR
 public partial class Cpu6502
 {
+    void SetFlagZN()
+    {
+        SetFlag( StatusFlag.Zero, A == 0 );
+        SetFlag( StatusFlag.Negative, (A & (u8)StatusFlag.Negative) > 0 );
+    }
+
     u8 Illegal()
     {
         throw new NotImplementedException();
@@ -14,9 +20,8 @@ public partial class Cpu6502
     /// <returns></returns>
     u8 LDA()
     {
-        A = NextByte();
-        SetFlag( StatusFlag.Zero, A == 0 );
-        SetFlag( StatusFlag.Negative, (A & (uint)StatusFlag.Negative) > 0 );
+        A = ReadByte( _operandAddress );
+        SetFlagZN();
 
         return 0;
     }
@@ -33,10 +38,10 @@ public partial class Cpu6502
     u8 AND()
     {
         A &= FetchData();
-        SetFlag(StatusFlag.Zero, A == 0 );
+        SetFlag( StatusFlag.Zero, A == 0 );
         // 1000 0000
-        SetFlag( StatusFlag.Negative, (A & (uint)StatusFlag.Negative) > 0 );
-        
+        SetFlag( StatusFlag.Negative, (A & (u8)StatusFlag.Negative) > 0 );
+
         return 1; // additional clock cycle
     }
 

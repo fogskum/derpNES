@@ -12,6 +12,7 @@ namespace DerpNES;
 
 /// <summary>
 /// Emulates the MOS Technology 6502
+/// https://www.middle-engine.com/blog/posts/2020/06/23/programming-the-nes-the-6502-in-detail
 /// </summary>
 public sealed partial class Cpu6502
 {
@@ -65,14 +66,14 @@ public sealed partial class Cpu6502
         LogState();
     }
 
-    Instruction GetCurrentInstruction() => _instructions[_currentInstructionAddress];
+    Instruction CurrentInstruction  => _instructions[_currentInstructionAddress];
     Instruction GetInstruction(u8 address) => _instructions[address];
 
     void LogState()
     {
         var sb = new StringBuilder();
 
-        var instruction = GetCurrentInstruction();
+        var instruction = CurrentInstruction;
         sb.AppendLine( $"Instruction: {instruction.Opcode.ToHex()}" );
 
         sb.AppendLine( "Registers" );
@@ -104,12 +105,12 @@ public sealed partial class Cpu6502
         if (_cycles == 0)
         {
             _currentInstructionAddress = NextByte();
-            var instruction = GetCurrentInstruction();
-            _cycles = (int)instruction.Cycles;
-            var cycle1 = instruction.AddressMode();
-            var cycle2 = instruction.Operate();
+            var instruction = CurrentInstruction;
+            _cycles = instruction.Cycles;
+            var additionalCycles1 = instruction.AddressMode();
+            var additionalCycles2 = instruction.Operate();
             // check if we need additional cycles
-            _cycles += (int)(cycle1 & cycle2);
+            _cycles += (additionalCycles1 & additionalCycles2);
         }
         _cycles--;
 
@@ -135,19 +136,19 @@ public sealed partial class Cpu6502
 
     u8 FetchData()
     {
-        if (_instructions[_currentInstructionAddress].AddressMode != Implied)
+        if (CurrentInstruction.AddressMode != Implied)
         {
-            _fetchedData = ReadByte( _addressAbsolute );
+            _byteToOperateOn = ReadByte( _operandAddress );
         }
-        return _fetchedData;
+        return _byteToOperateOn;
     }
 
-    u8 _fetchedData = 0x00;
-    u16 _addressAbsolute = 0x0000;
+    u8 _byteToOperateOn = 0x00;
+    u16 _operandAddress = 0x0000;
     u16 _addressRelative = 0x0000;
     int _cycles = 0;
 
-    Dictionary<u8, Instruction> _instructions;
+    ImmutableDictionary<u8, Instruction> _instructions;
     u8 _currentInstructionAddress;
 
     private readonly IBus memory = new Memory();
@@ -174,13 +175,14 @@ public sealed partial class Cpu6502
          new Instruction( Name: nameof( LDA ), Opcode: 0xA1, Operate: LDA, AddressMode: IndirectX, Cycles: 6 ),
          new Instruction( Name: nameof( LDA ), Opcode: 0xB1, Operate: LDA, AddressMode: IndirectY, Cycles: 5 )
         );
-        _instructions = instructions.ToDictionary( k => k.Opcode, v => v );
+        _instructions = instructions.ToImmutableDictionary( k => k.Opcode, v => v );
         this.logger = logger;
     }
 
     public u8 ReadByte( u16 address ) => memory.Read( address );
     public void WriteByte( u16 address, u8 data ) => memory.Write( address, data );
     
+    // read the next byte and prep next address
     u8 NextByte() => ReadByte( PC++ );
 
     // 6502 is little endian

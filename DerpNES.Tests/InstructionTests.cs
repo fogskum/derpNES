@@ -32,6 +32,7 @@ public class InstructionTests
     {
         // arrange
         u8 A = 42;
+        int cyclesExpected = 2;
         
         var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
@@ -40,15 +41,39 @@ public class InstructionTests
         _cpu.WriteByte( 0x0001, A );
 
         // act
-        _cpu.ExecuteInstruction();
+        var cycles = _cpu.ExecuteInstruction();
 
         // assert
         
         // registers
         Assert.That( A, Is.EqualTo( _cpu.A ) );
 
-        // todo: assert all flags
         Assert.That( Z, Is.EqualTo( _cpu.GetFlag(Cpu6502.StatusFlag.Zero) ) );
         Assert.That( N, Is.EqualTo( _cpu.GetFlag(Cpu6502.StatusFlag.Negative) ) );
+    }
+
+    [Test]
+    public void Test_LDA_ZeroPage_LoadsValue()
+    {
+        // arrange
+        u8 A = 42;
+        int cyclesExpected = 2;
+
+        var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
+        var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
+
+        _cpu.WriteByte( 0x0000, 0xA5 ); // LDA ZeroPage instruction
+        _cpu.WriteByte( 0x0001, A );
+
+        // act
+        var cycles = _cpu.ExecuteInstruction();
+
+        // assert
+
+        // registers
+        Assert.That( A, Is.EqualTo( _cpu.A ) );
+
+        Assert.That( Z, Is.EqualTo( _cpu.GetFlag( Cpu6502.StatusFlag.Zero ) ) );
+        Assert.That( N, Is.EqualTo( _cpu.GetFlag( Cpu6502.StatusFlag.Negative ) ) );
     }
 }
