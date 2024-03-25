@@ -45,7 +45,7 @@ public sealed partial class Cpu6502
 
     public u8 A { get; private set; }
     public u8 X { get; set; }
-    public u8 Y { get; private set; }
+    public u8 Y { get; set; }
 
     // Stack pointer
     // Points to an address somewhere in the memory (bus)

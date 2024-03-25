@@ -193,4 +193,35 @@ public class InstructionTests
         Assert.That( Z, Is.EqualTo( _cpu.GetFlag( Cpu6502.StatusFlag.Zero ) ) );
         Assert.That( N, Is.EqualTo( _cpu.GetFlag( Cpu6502.StatusFlag.Negative ) ) );
     }
+
+    [Test]
+    public void Test_LDA_AbsoluteY_No_Page_Change_LoadsValue()
+    {
+        // arrange
+        u8 Y = 5;
+        _cpu.Y = Y;
+        u8 A = 42;
+        int expectedCycles = 4;
+
+        var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
+        var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
+
+        _cpu.WriteByte( 0x0000, 0xB9 ); // LDA, absolute Y instruction
+        _cpu.WriteByte( 0x0001, 0xB0 );
+        _cpu.WriteByte( 0x0002, 0xA0 );
+        var valueAddress = 0xA0B0 + Y;
+        _cpu.WriteByte( (u16)valueAddress, A );
+
+        // act
+        var cycles = _cpu.ExecuteInstruction();
+
+        // assert
+
+        Assert.That( expectedCycles, Is.EqualTo( cycles ) );
+
+        // registers
+        Assert.That( A, Is.EqualTo( _cpu.A ) );
+        Assert.That( Z, Is.EqualTo( _cpu.GetFlag( Cpu6502.StatusFlag.Zero ) ) );
+        Assert.That( N, Is.EqualTo( _cpu.GetFlag( Cpu6502.StatusFlag.Negative ) ) );
+    }
 }
