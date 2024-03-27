@@ -8,6 +8,20 @@ public class BitOperationTests
     }
 
     [Test]
+    public void Test_BitHelper_BitIsSet()
+    {
+        u8 value = 0b0000_1001;
+        Assert.That( value.IsBitSet( 4 ), Is.True );
+    }
+
+    [Test]
+    public void Test_BitHelper_BitIsNotSet()
+    {
+        u8 value = 0b0000_1001;
+        Assert.That( value.IsBitSet( 3 ), Is.False );
+    }
+
+    [Test]
     public void Test_AND()
     {
         u8 a = 0b0110_1110;
