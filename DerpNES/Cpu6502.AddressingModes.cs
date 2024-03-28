@@ -88,9 +88,6 @@ public partial class Cpu6502
     {
         _addressRelative = NextByte();
         // 0x80 = 1000 0000
-        // 
-        var test = 0x80;
-        var b = Convert.ToString( test, 2 );
         if(BitHelper.IsBitSet(_addressRelative, 8))
         {
             _addressRelative |= 0xFF00;

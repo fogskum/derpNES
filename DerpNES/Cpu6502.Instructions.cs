@@ -11,7 +11,7 @@ public partial class Cpu6502
 
     u8 Illegal()
     {
-        throw new NotImplementedException();
+        return 0;
     }
 
     /// <summary>

@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System;
 using System.Collections.Immutable;
+using System.Net;
 using System.Text;
 
 namespace DerpNES;
@@ -66,7 +69,18 @@ public sealed partial class Cpu6502
         LogState();
     }
 
-    Instruction CurrentInstruction  => _instructions[_currentInstructionAddress];
+    Instruction CurrentInstruction
+    {
+        get
+        {
+            if(_instructions.TryGetValue(_currentInstructionAddress, out var instruction))
+            {
+                return instruction;
+            }
+            throw new IndexOutOfRangeException( $"Unknown instruction at address {_currentInstructionAddress.ToHex()}" );
+        }
+    }
+
     public Instruction GetInstruction(u8 address) => _instructions[address];
 
     void LogState()
@@ -150,11 +164,14 @@ public sealed partial class Cpu6502
     ImmutableDictionary<u8, Instruction> _instructions;
     u8 _currentInstructionAddress;
 
-    private readonly IBus memory = new Memory();
+    private readonly IBus memory;
     private readonly ILogger<Cpu6502> logger;
 
     public Cpu6502(ILogger<Cpu6502> logger)
     {
+        this.memory = new Memory();
+        this.logger = logger;
+
         var instructions = ImmutableArray.Create(
          new Instruction( Name: nameof(BRK), Opcode: 0x00, Operate: BRK, AddressMode: Immediate, Cycles: 7 ),
          new Instruction( Name: nameof( ORA ), Opcode: 0x09, Operate: ORA, AddressMode: Immediate, Cycles: 2 ),
@@ -176,22 +193,24 @@ public sealed partial class Cpu6502
          new Instruction( Name: nameof( BNE ), Opcode: 0xD0, Operate: BNE, AddressMode: Relative, Cycles: 2 )
         );
         _instructions = instructions.ToImmutableDictionary( k => k.Opcode, v => v );
-        this.logger = logger;
     }
 
     public u8 ReadByte( u16 address ) => memory.Read( address );
     public u8 ReadByte() => ReadByte( PC );
     public void WriteByte( u16 address, u8 data ) => memory.Write( address, data );
-    
+
     // read the next byte and prep next address
     u8 NextByte() => ReadByte( PC++ );
 
     // 6502 is little endian
+    // In little-endian systems, the least significant byte (LSB)
+    // of the data is stored in memory at the lowest address.
+    // Subsequent bytes with increasing significance follow at higher memory addresses.
     u16 NextWord() => (u16)(NextByte() | (NextByte() << 8));
     u16 ReadWord() => (u16)(ReadByte( PC ) | (ReadByte(PC) << 8));
 
     public bool GetFlag( StatusFlag flagBit )
-        => (FlagStatus & (uint)flagBit) > 0 ? true : false;
+        => (FlagStatus & (u8)flagBit) > 0 ? true : false;
 
     public void SetFlag( StatusFlag flagBit, bool set )
     {
