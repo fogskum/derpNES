@@ -1,32 +1,7 @@
-using Microsoft.Extensions.Logging;
-
 namespace DerpNES.Tests;
 
-public class InstructionTests
+public partial class CpuTests
 {
-    ILogger<Cpu6502> _logger;
-    Cpu6502 _cpu;
-
-    [SetUp]
-    public void Setup()
-    {
-        _logger = new NullLogger<Cpu6502>();
-        _cpu = new Cpu6502( _logger );
-    }
-
-    [Test]
-    public void Test_Flag_Get_And_Set()
-    {
-        _cpu.SetFlag( Cpu6502.StatusFlag.Zero, true );
-        _cpu.SetFlag( Cpu6502.StatusFlag.Negative, true );
-        var flagStatus = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
-        Assert.That( flagStatus, Is.EqualTo( true ) );
-
-        _cpu.SetFlag( Cpu6502.StatusFlag.Zero, false );
-        flagStatus = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
-        Assert.That( flagStatus, Is.EqualTo( false ) );
-    }
-
     [Test]
     public void Test_LDA_Immediate_LoadsValue()
     {
@@ -37,8 +12,8 @@ public class InstructionTests
         var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
 
-        _cpu.WriteByte( 0x0000, 0xA9 ); // LDA immediate instruction
-        _cpu.WriteByte( 0x0001, A );
+        _cpu.WriteByte( 0xFFFC, 0xA9 ); // LDA immediate instruction
+        _cpu.WriteByte( 0xFFFD, A );
 
         // act
         var cycles = _cpu.ExecuteInstruction();
@@ -63,8 +38,8 @@ public class InstructionTests
         var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
 
-        _cpu.WriteByte( 0x0000, 0xA5 ); // LDA ZeroPage instruction
-        _cpu.WriteByte( 0x0001, 0x0A ); // look for value at 0x0A
+        _cpu.WriteByte( 0xFFFC, 0xA5 ); // LDA ZeroPage instruction
+        _cpu.WriteByte( 0xFFFD, 0x0A ); // look for value at 0x0A
         _cpu.WriteByte( 0x000A, A );
 
         // act
@@ -91,8 +66,8 @@ public class InstructionTests
         var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
 
-        _cpu.WriteByte( 0x0000, 0xB5 ); // LDA ZeroPage, X instruction
-        _cpu.WriteByte( 0x0001, 0x0A ); // look for value at 0x0A+X
+        _cpu.WriteByte( 0xFFFC, 0xB5 ); // LDA ZeroPage, X instruction
+        _cpu.WriteByte( 0xFFFD, 0x0A ); // look for value at 0x0A+X
         var valueAddress = 0x0A + X;
         _cpu.WriteByte( (u16)valueAddress, A );
 
@@ -119,8 +94,8 @@ public class InstructionTests
         var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
 
-        _cpu.WriteByte( 0x0000, 0xB5 ); // LDA ZeroPage, X instruction
-        _cpu.WriteByte( 0x0001, 0x80 ); // look for value at 0x0A+X
+        _cpu.WriteByte( 0xFFFC, 0xB5 ); // LDA ZeroPage, X instruction
+        _cpu.WriteByte( 0xFFFD, 0x80 ); // look for value at 0x0A+X
         _cpu.WriteByte( 0x007F, A );
 
         // act
@@ -145,9 +120,9 @@ public class InstructionTests
         var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
 
-        _cpu.WriteByte( 0x0000, 0xAD ); // LDA, absolute instruction
-        _cpu.WriteByte( 0x0001, 0xB0 );
-        _cpu.WriteByte( 0x0002, 0xA0 );
+        _cpu.WriteByte( 0xFFFC, 0xAD ); // LDA, absolute instruction
+        _cpu.WriteByte( 0xFFFD, 0xB0 );
+        _cpu.WriteByte( 0xFFFE, 0xA0 );
         _cpu.WriteByte( 0xA0B0, A );
 
         // act
@@ -175,9 +150,9 @@ public class InstructionTests
         var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
 
-        _cpu.WriteByte( 0x0000, 0xBD ); // LDA, absolute, X instruction
-        _cpu.WriteByte( 0x0001, 0xB0 );
-        _cpu.WriteByte( 0x0002, 0xA0 );
+        _cpu.WriteByte( 0xFFFC, 0xBD ); // LDA, absolute, X instruction
+        _cpu.WriteByte( 0xFFFD, 0xB0 );
+        _cpu.WriteByte( 0xFFFE, 0xA0 );
         var valueAddress = 0xA0B0 + X;
         _cpu.WriteByte( (u16)valueAddress, A );
 
@@ -206,9 +181,9 @@ public class InstructionTests
         var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
 
-        _cpu.WriteByte( 0x0000, 0xB9 ); // LDA, absolute Y instruction
-        _cpu.WriteByte( 0x0001, 0xB0 );
-        _cpu.WriteByte( 0x0002, 0xA0 );
+        _cpu.WriteByte( 0xFFFC, 0xB9 ); // LDA, absolute Y instruction
+        _cpu.WriteByte( 0xFFFD, 0xB0 );
+        _cpu.WriteByte( 0xFFFE, 0xA0 );
         var valueAddress = 0xA0B0 + Y;
         _cpu.WriteByte( (u16)valueAddress, A );
 
@@ -226,19 +201,21 @@ public class InstructionTests
     }
 
     [Test]
-    public void Test_BNE_Relative_Is_True_And_Paged_Crossed()
+    public void Test_LDA_IndexedIndirect_No_Page_Change_LoadsValue()
     {
         // arrange
-        int expectedCycles = 4;
-        u16 PC = 2;
+        _cpu.X = 4;
+        u8 A = 42;
+        int expectedCycles = 6;
 
         var Z = _cpu.GetFlag( Cpu6502.StatusFlag.Zero );
         var N = _cpu.GetFlag( Cpu6502.StatusFlag.Negative );
 
-        _cpu.WriteByte( 0x0000, 0xD0 ); // BNE, relative instruction
-        _cpu.WriteByte( 0x0001, 0xB0 ); // relative address
-        var valueAddress = 0x0001 + 0xB0;
-        _cpu.WriteByte( (u16)valueAddress, (u8)PC );
+        _cpu.WriteByte( 0xFFFC, 0xA1 );
+        _cpu.WriteByte( 0xFFFD, 0x02 );
+        _cpu.WriteByte( 0x0006, 0x00 ); // 2 + 4
+        _cpu.WriteByte( 0x0007, 0x80 );
+        _cpu.WriteByte( 0x8000, A );
 
         // act
         var cycles = _cpu.ExecuteInstruction();
@@ -248,7 +225,7 @@ public class InstructionTests
         Assert.That( expectedCycles, Is.EqualTo( cycles ) );
 
         // registers
-        Assert.That( PC, Is.EqualTo( _cpu.A ) );
+        Assert.That( A, Is.EqualTo( _cpu.A ) );
         Assert.That( Z, Is.EqualTo( _cpu.GetFlag( Cpu6502.StatusFlag.Zero ) ) );
         Assert.That( N, Is.EqualTo( _cpu.GetFlag( Cpu6502.StatusFlag.Negative ) ) );
     }

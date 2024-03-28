@@ -17,7 +17,7 @@ public partial class Cpu6502
     {
         u8 lowByte = NextByte();
         u8 highByte = NextByte();
-        _operandAddress = (u16)(lowByte | highByte << 8);
+        _operandAddress = CombineBytes( lowByte, highByte );
         return 0;
     }
 
@@ -26,7 +26,7 @@ public partial class Cpu6502
     {
         u8 lowByte = NextByte();
         u8 highByte = NextByte();
-        _operandAddress = (u16)(lowByte | highByte << 8);
+        _operandAddress = CombineBytes( lowByte, highByte );
         _operandAddress += X;
 
         if ((u16)(_operandAddress & 0xFF00) != (u16)(highByte << 8))
@@ -41,7 +41,7 @@ public partial class Cpu6502
     {
         u8 lowByte = NextByte();
         u8 highByte = NextByte();
-        _operandAddress = (u16)(lowByte | highByte << 8);
+        _operandAddress = CombineBytes( lowByte, highByte );
         _operandAddress += Y;
 
         if ((u16)(_operandAddress & 0xFF00) != (u16)(highByte << 8))
@@ -81,14 +81,27 @@ public partial class Cpu6502
         return 0;
     }
 
-    u8 IndirectX() => throw new NotImplementedException();
+    /// <summary>
+    /// Indexed indirect
+    /// </summary>
+    /// <returns></returns>
+    u8 IndirectX()
+    {
+        var zeroPageAddress = NextByte();
+        zeroPageAddress += X;
+        var effectiveAddress = ReadWord( zeroPageAddress );
+        _operandAddress = effectiveAddress;
+
+        return 0;
+    }
+
     u8 IndirectY() => throw new NotImplementedException();
 
     u8 Relative()
     {
         _addressRelative = NextByte();
         // 0x80 = 1000 0000
-        if(BitHelper.IsBitSet(_addressRelative, 8))
+        if (BitHelper.IsBitSet( _addressRelative, 8 ))
         {
             _addressRelative |= 0xFF00;
         }

@@ -134,13 +134,12 @@ public sealed partial class Cpu6502
     public void Reset() 
     {
         PC = 0xFFFC;
-        SP = 0x0100;
-        FlagStatus = 0;
+        SP = 0;
         A = X = Y = 0;
 
-        // test
-        memory.Write( 0xFFFC, 0xA9 );
-        memory.Write( 0xFFFD, 42 );
+        // set all flags to false, except DI
+        FlagStatus = 0; 
+        SetFlag( StatusFlag.DisableInterrupts, true );
     }
     
     void InterruptRequest() { }
@@ -193,6 +192,8 @@ public sealed partial class Cpu6502
          new Instruction( Name: nameof( BNE ), Opcode: 0xD0, Operate: BNE, AddressMode: Relative, Cycles: 2 )
         );
         _instructions = instructions.ToImmutableDictionary( k => k.Opcode, v => v );
+
+        Reset();
     }
 
     public u8 ReadByte( u16 address ) => memory.Read( address );
@@ -207,7 +208,16 @@ public sealed partial class Cpu6502
     // of the data is stored in memory at the lowest address.
     // Subsequent bytes with increasing significance follow at higher memory addresses.
     u16 NextWord() => (u16)(NextByte() | (NextByte() << 8));
-    u16 ReadWord() => (u16)(ReadByte( PC ) | (ReadByte(PC) << 8));
+    
+    u16 ReadWord( u16 address )
+    {
+        var lowByte = ReadByte( address );
+        var highByte = ReadByte( (u16)(address + 1) );
+        return CombineBytes( lowByte, highByte );
+    }
+
+    u16 CombineBytes(u8 lowByte, u8 highByte) 
+        => (u16)(lowByte | highByte << 8);
 
     public bool GetFlag( StatusFlag flagBit )
         => (FlagStatus & (u8)flagBit) > 0 ? true : false;
