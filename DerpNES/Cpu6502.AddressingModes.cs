@@ -84,7 +84,19 @@ public partial class Cpu6502
     u8 IndirectX() => throw new NotImplementedException();
     u8 IndirectY() => throw new NotImplementedException();
 
-    u8 Relative() => throw new NotImplementedException();
+    u8 Relative()
+    {
+        _addressRelative = NextByte();
+        // 0x80 = 1000 0000
+        // 
+        var test = 0x80;
+        var b = Convert.ToString( test, 2 );
+        if(BitHelper.IsBitSet(_addressRelative, 8))
+        {
+            _addressRelative |= 0xFF00;
+        }
+        return 0;
+    }
 
     // The zero page is the first 256 bytes of the CPU's address space, from addresses 0x0000 to 0x00FF
     // The most significant byte of a zero page address will always be 0x00.

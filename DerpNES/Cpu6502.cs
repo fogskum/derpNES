@@ -172,7 +172,8 @@ public sealed partial class Cpu6502
          new Instruction( Name: nameof( LDA ), Opcode: 0xBD, Operate: LDA, AddressMode: AbsoluteX, Cycles: 4 ),
          new Instruction( Name: nameof( LDA ), Opcode: 0xB9, Operate: LDA, AddressMode: AbsoluteY, Cycles: 4 ),
          new Instruction( Name: nameof( LDA ), Opcode: 0xA1, Operate: LDA, AddressMode: IndirectX, Cycles: 6 ),
-         new Instruction( Name: nameof( LDA ), Opcode: 0xB1, Operate: LDA, AddressMode: IndirectY, Cycles: 5 )
+         new Instruction( Name: nameof( LDA ), Opcode: 0xB1, Operate: LDA, AddressMode: IndirectY, Cycles: 5 ),
+         new Instruction( Name: nameof( BNE ), Opcode: 0xD0, Operate: BNE, AddressMode: Relative, Cycles: 2 )
         );
         _instructions = instructions.ToImmutableDictionary( k => k.Opcode, v => v );
         this.logger = logger;
